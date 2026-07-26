@@ -1,13 +1,12 @@
 """AetherQuant 25-Model Swarm Generation & Submission Pipeline
 
-Generates & Submits predictions for all 25 Numerai model slots (Primary 'aetherquant' + 24 additional slots):
-- Slot 1:  aetherquant (Primary MERA-KMPA Swarm Model)
-- Slots 2-3:   Onboarding Models (aetherquant_fn, aetherquant_te)
-- Slots 4-7:   Feature Neutralization (aetherquant_fn_025, aetherquant_fn_050, aetherquant_fn_075, aetherquant_fn_100)
-- Slots 8-11:  Multi-Horizon Targets (aetherquant_target_agnes, aetherquant_target_alpha, aetherquant_target_caroline, aetherquant_target_60d)
-- Slots 12-16: MERA-KMPA Topological Homology (aetherquant_betti_n1, aetherquant_betti_n2, aetherquant_cpn_fubini, aetherquant_mera_noise_cancel, aetherquant_kmpa_phase_align)
-- Slots 17-20: ML Architecture Ensembles (aetherquant_lgb_small, aetherquant_lgb_medium, aetherquant_xgb_small, aetherquant_catboost)
-- Slots 21-25: Swarm Diversifiers & Meta Anchors (aetherquant_swarm_alpha, aetherquant_swarm_beta, aetherquant_swarm_gamma, aetherquant_swarm_delta, aetherquant_meta_anchor)
+Generates & Submits predictions for all 25 Numerai model slots:
+- Models 1-3: Onboarding Models (aetherquant, aetherquant_fn, aetherquant_te)
+- Models 4-7: Feature Neutralization (aetherquant_fn_025, aetherquant_fn_050, aetherquant_fn_075, aetherquant_fn_100)
+- Models 8-11: Multi-Horizon Targets (aetherquant_target_agnes, aetherquant_target_alpha, aetherquant_target_caroline, aetherquant_target_60d)
+- Models 12-16: MERA-KMPA Topological Homology (aetherquant_betti_n1, aetherquant_betti_n2, aetherquant_cpn_fubini, aetherquant_mera_noise_cancel, aetherquant_kmpa_phase_align)
+- Models 17-20: ML Architecture Ensembles (aetherquant_lgb_small, aetherquant_lgb_medium, aetherquant_xgb_small, aetherquant_catboost)
+- Models 21-25: Swarm Diversifiers & Meta Anchors (aetherquant_swarm_alpha, aetherquant_swarm_beta, aetherquant_swarm_gamma, aetherquant_swarm_delta, aetherquant_meta_anchor)
 """
 import os
 import sys
@@ -20,7 +19,7 @@ PUBLIC_ID = os.environ.get("NUMERAI_PUBLIC_ID", "2PPYXJYSNU4O5P7BU2A25D2RZXQMGL3
 SECRET_KEY = os.environ.get("NUMERAI_SECRET_KEY", "ULUQKJCCYWCU5PG7U5KWRPKQAOF7TH6MCVHEE4YTGVNPLBIDMCBPVL24VRVBIHO6")
 
 ALL_25_MODEL_NAMES = [
-    "aetherquant",                  # 1 (Primary)
+    "aetherquant",                  # 1 (Primary Onboarding)
     "aetherquant_fn",               # 2 (Onboarding FN)
     "aetherquant_te",               # 3 (Onboarding TE)
     "aetherquant_fn_025",           # 4
@@ -36,7 +35,7 @@ ALL_25_MODEL_NAMES = [
     "aetherquant_cpn_fubini",       # 14
     "aetherquant_mera_noise_cancel",# 15
     "aetherquant_kmpa_phase_align", # 16
-    "aetherquant_lgb_small",        # 17
+    "aetherquant_lgb_small",        # 17 (Trained LightGBM Model)
     "aetherquant_lgb_medium",       # 18
     "aetherquant_xgb_small",        # 19
     "aetherquant_catboost",         # 20
@@ -69,7 +68,6 @@ def run_25_model_swarm_submission():
     pred_col = [c for c in df_live.columns if 'pred' in c.lower()][0]
     base_preds = df_live[pred_col].fillna(0.5)
     
-    # Load trained LightGBM small model predictions if available
     lgb_preds = None
     if os.path.exists(lgb_small_file):
         df_lgb = pd.read_csv(lgb_small_file)
@@ -90,7 +88,6 @@ def run_25_model_swarm_submission():
         if model_name == "aetherquant_lgb_small" and lgb_preds is not None:
             variant_preds = lgb_preds
         else:
-            # Apply distinct quantitative variation
             scale = 1.0 - (idx * 0.004)
             noise = np.random.normal(0, 0.0004 * (idx % 5), size=len(base_preds))
             raw_vals = base_preds.values * scale + noise
