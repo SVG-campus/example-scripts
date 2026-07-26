@@ -56,6 +56,7 @@ def run_25_model_swarm_submission():
     
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data", "v5.3")
     live_preds_file = os.path.join(data_dir, "live_example_preds.parquet")
+    lgb_small_file = os.path.join(os.path.dirname(__file__), "..", "predictions", "live_predictions_lgb_small.csv")
     
     if not os.path.exists(live_preds_file):
         print("Downloading v5.3/live_example_preds.parquet...")
@@ -68,6 +69,13 @@ def run_25_model_swarm_submission():
     pred_col = [c for c in df_live.columns if 'pred' in c.lower()][0]
     base_preds = df_live[pred_col].fillna(0.5)
     
+    # Load trained LightGBM small model predictions if available
+    lgb_preds = None
+    if os.path.exists(lgb_small_file):
+        df_lgb = pd.read_csv(lgb_small_file)
+        lgb_preds = df_lgb.set_index('id')['prediction']
+        print(f"Loaded trained LightGBM small predictions ({len(lgb_preds)} rows).")
+        
     out_dir = os.path.join(os.path.dirname(__file__), "..", "predictions", "swarm_25")
     os.makedirs(out_dir, exist_ok=True)
     
@@ -79,13 +87,15 @@ def run_25_model_swarm_submission():
     for idx, model_name in enumerate(ALL_25_MODEL_NAMES, 1):
         print(f"\n[{idx}/25] Processing Swarm Model: {model_name}...")
         
-        # Apply distinct quantitative variation
-        scale = 1.0 - (idx * 0.004)
-        noise = np.random.normal(0, 0.0004 * (idx % 5), size=len(base_preds))
-        raw_vals = base_preds.values * scale + noise
-        raw_vals = np.nan_to_num(raw_vals, nan=0.5)
-        
-        variant_preds = rank_normalize(pd.Series(raw_vals, index=df_live['id'])).fillna(0.5)
+        if model_name == "aetherquant_lgb_small" and lgb_preds is not None:
+            variant_preds = lgb_preds
+        else:
+            # Apply distinct quantitative variation
+            scale = 1.0 - (idx * 0.004)
+            noise = np.random.normal(0, 0.0004 * (idx % 5), size=len(base_preds))
+            raw_vals = base_preds.values * scale + noise
+            raw_vals = np.nan_to_num(raw_vals, nan=0.5)
+            variant_preds = rank_normalize(pd.Series(raw_vals, index=df_live['id'])).fillna(0.5)
         
         csv_path = os.path.join(out_dir, f"{model_name}.csv")
         df_sub = pd.DataFrame({'id': df_live['id'], 'prediction': variant_preds})
