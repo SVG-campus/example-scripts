@@ -1,0 +1,27 @@
+{
+  "submission_queue": [
+    {
+      "submission_id": 11,
+      "name": "IV/HV Ratio + Cap-Group Neutralization (Sharpe 2.76)",
+      "category": "Price Volume",
+      "sharpe": 2.76,
+      "fitness": 1.76,
+      "sub_universe_sharpe": 1.90,
+      "drawdown_pct": 1.94,
+      "margin_bps": 6.08,
+      "year_2020_sharpe": 4.43,
+      "description": "Ratios Call/Put IV difference against 30-day Historical Volatility (historical_volatility_30) neutralized within 10 market cap buckets and 5d/20d return reversion under subindustry neutralization.",
+      "expression": "iv_diff = ts_backfill(implied_volatility_call_30, 5) - ts_backfill(implied_volatility_put_30, 5);\nhv = ts_backfill(historical_volatility_30, 5);\ncap_group = bucket(rank(cap), range=\"0.1,1,0.1\");\ngroup_neutralize(ts_decay_linear(winsorize(rank(group_neutralize(iv_diff / (hv + 0.0001), cap_group)) + rank(-ts_zscore(returns, 5)) + rank(-ts_zscore(returns, 20)), std=4), 10), subindustry)"
+    },
+    {
+      "submission_id": 12,
+      "name": "Cap-Group Neutralized IV Diff + Multi-Z Reversion (Sharpe 2.26)",
+      "category": "Price Volume",
+      "sharpe": 2.26,
+      "fitness": 1.29,
+      "turnover_pct": 46.58,
+      "description": "Neutralizes Call/Put IV difference within 10 market cap buckets, combined with 5d/20d return z-score reversion under subindustry neutralization.",
+      "expression": "iv_difference = ts_backfill(implied_volatility_call_30, 5) - ts_backfill(implied_volatility_put_30, 5);\ncap_group = bucket(rank(cap), range=\"0.1,1,0.1\");\ngroup_neutralize(ts_decay_linear(winsorize(rank(group_neutralize(iv_difference, cap_group)) + rank(-ts_zscore(returns, 5)) + rank(-ts_zscore(returns, 20)), std=4), 10), subindustry)"
+    }
+  ]
+}
