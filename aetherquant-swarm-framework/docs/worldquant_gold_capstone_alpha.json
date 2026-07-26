@@ -1,0 +1,18 @@
+{
+  "gold_level_capstone": {
+    "target_score": 10000,
+    "current_accrued_score": 9965,
+    "points_needed": 35,
+    "submission_id": 13,
+    "name": "MERA_KMPA_Gold_Capstone_Multi_Factor_Synergy",
+    "category": "Sentiment",
+    "region": "USA",
+    "universe": "TOP3000",
+    "delay": 1,
+    "decay": 10,
+    "neutralization": "SUBINDUSTRY",
+    "truncation": 0.08,
+    "description": "Gold Level capstone multi-factor alpha combining options implied volatility skew, vector news sentiment, and 10-day return reversion under market cap bucket and subindustry neutralization.",
+    "expression": "a1 = ts_backfill(implied_volatility_call_30, 5) - ts_backfill(implied_volatility_put_30, 5);\na2 = vec_avg(nws12_afterhsz_sl);\ngroup_neutralize(ts_decay_linear(winsorize(rank(group_neutralize(a1, bucket(rank(cap), range=\"0.1,1,0.1\"))) + rank(ts_sum(a2, 20)) + rank(-ts_zscore(returns, 10)), std=4), 10), subindustry)"
+  }
+}
