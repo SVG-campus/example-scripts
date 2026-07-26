@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mera-kmpa-swarm-framework"
+version = "1.0.0"
+description = "A unified mathematical framework for quantum-cognitive swarm consensus, Betti loop topological analysis, causal discovery, and non-linear genetic feature synthesis."
+readme = "README.md"
+authors = [
+    { name = "SVG Campus Deepmind", email = "svillalobosgonzalez1@example.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.22.0",
+    "pandas>=1.4.0",
+    "scipy>=1.8.0"
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0.0"]
+
+[project.scripts]
+mera-swarm = "cli:main"
