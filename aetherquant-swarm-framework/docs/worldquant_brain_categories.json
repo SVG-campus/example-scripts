@@ -1,0 +1,22 @@
+{
+  "platform": "WorldQuant BRAIN",
+  "official_categories": [
+    "None",
+    "Price Reversion",
+    "Price Momentum",
+    "Volume",
+    "Fundamental",
+    "Analyst",
+    "Price Volume",
+    "Relation",
+    "Sentiment"
+  ],
+  "chapter_mapping": {
+    "Chapter 1 (Price-Volume)": "Price Reversion / Price Momentum / Price Volume",
+    "Chapter 2 (Price-Volume & Reversion)": "Price Reversion",
+    "Chapter 3 (Fundamental & EV/EBITDA)": "Fundamental",
+    "Chapter 4 (Option Alphas & Volatility Skew)": "Sentiment",
+    "Chapter 5 (Analyst & Multi-Factor)": "Analyst",
+    "Chapter 6 (Sentiment & Alt Data)": "Sentiment"
+  }
+}
